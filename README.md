@@ -2,8 +2,7 @@
 Ebanina is a library, that creates a huge horrible ebanina from a small and pretty number. If you don't know what is ebanina - visit it official page in Vkontakte: https://vk.com/ebaninaofficial
 
 Ebanina allows you to create something horrible using bitwise operations. Sample:
-> Ebanina(42)
-> (-~0<<(-~0<<0))|(-~0<<((-~0<<0)|(-~0<<(-~0<<0))))|(-~0<<((-~0<<0)|(-~0<<(-~0<<(-~0<<0)))))
+> Ebanina(42) = (-~0<<(-~0<<0))|(-~0<<((-~0<<0)|(-~0<<(-~0<<0))))|(-~0<<((-~0<<0)|(-~0<<(-~0<<(-~0<<0)))))
 
 This library allows you to create Ebanina in a very simple and fast way. To illustrate the power of the library: Ebanina(2^10000000 - 1 ) was computing about 1.5 hour on my PC.
 
