@@ -1,79 +1,129 @@
-﻿#include <iostream>
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <array>
-#include <utility>
+#include "Ebanina.h"
 
-using namespace std;
+Ebanina::Ebanina(uint64_t n) : mNumber(n) {}
 
-string createEbanina(uint64_t x);
-
-void setBitsOffset(vector<uint64_t> & bits, uint64_t x);
-string makeMagicPowString(uint64_t power);
-pair<bool, uint64_t> isMagicPower(uint64_t x);
-
-int main()
+Ebanina::Ebanina(uint64_t base, uint64_t power)
 {
-	uint64_t n;
-	cin >> n;
-	cout << createEbanina(n) << endl;
+	mpz_pow_ui(mNumber.get_mpz_t(), mpz_class(base).get_mpz_t(), power);
 }
 
-string createEbanina(uint64_t x)
+Ebanina::Ebanina(mpz_class n) : mNumber(n) {}
+
+Ebanina::Ebanina(std::string_view s, uint32_t base) : mNumber(s.data(), base) {}
+
+Ebanina::~Ebanina() {}
+
+
+void Ebanina::create()
+{
+	if(!mCacheValid) mEbanina = createEbanina(mNumber);
+	mCacheValid = true;
+}
+
+std::string Ebanina::getString()
+{
+	if (mCacheValid) return mEbanina;
+	throw std::logic_error("Cache is not valid");
+}
+
+void Ebanina::toFile(std::string_view filename)
+{
+	if(!mCacheValid) throw std::logic_error("Cache is not valid");
+
+	std::ofstream file(filename.data());
+	if (!file.is_open()) throw std::runtime_error("Wrong file name");
+
+	file << mEbanina;
+	file.close();
+}
+
+
+std::string Ebanina::createEbanina(mpz_class x)
 {
 	if (x == 0) return "0";
 
-	vector<uint64_t> bits;
-	setBitsOffset(bits, x);
+	std::vector<uint64_t> bits;
+	calcBitsPosition(bits, x);
 
-	string ebanina;
+	std::string ebanina;
 	for (auto bit : bits)
 	{
 		auto[isMagic, power] = isMagicPower(bit);
 
 		if (isMagic) ebanina += makeMagicPowString(power);
-		else ebanina += "(-~0<<(" + createEbanina(bit) + "))";
+		else ebanina += "-~0<<(" + createEbanina(bit) + ")";
 
 		if (bit != bits.back()) ebanina += "|";
-	}
-
-	if (ebanina.front() != '(')
-	{
-		ebanina = "(" + ebanina + ")";
 	}
 
 	return ebanina;
 }
 
-void setBitsOffset(vector<uint64_t> & bits, uint64_t x)
+std::string Ebanina::createEbanina(uint64_t x)
 {
-	for (uint64_t i = 0; i <= log2(x); ++i)
+	if (x == 0) return "0";
+
+	std::vector<uint64_t> bits;
+	calcBitsPosition(bits, x);
+
+	std::string ebanina;
+	for (auto bit : bits)
 	{
-		if (x & (uint64_t(1) << i)) bits.emplace_back(i);
+		auto[isMagic, power] = isMagicPower(bit);
+
+		if (isMagic) ebanina += makeMagicPowString(power);
+		else ebanina += "-~0<<(" + createEbanina(bit) + ")";
+
+		if (bit != bits.back()) ebanina += "|";
+	}
+
+	return ebanina;
+}
+
+std::pair<bool, uint64_t> Ebanina::isMagicPower(uint64_t x) noexcept
+{
+	switch (x)
+	{
+	case 0:		return std::make_pair(true, 0);
+	case 1:		return std::make_pair(true, 1);
+	case 2:		return std::make_pair(true, 2);
+	case 4:		return std::make_pair(true, 4);
+	case 16:	return std::make_pair(true, 16);
+	case 65536: return std::make_pair(true, 65536);
+	default:	return std::make_pair(false, 0);
 	}
 }
 
-string makeMagicPowString(uint64_t power)
+std::string Ebanina::makeMagicPowString(uint64_t power) noexcept
 {
-	if (power == 0) return string("(-~0<<0)");
-
-	string begin, end;
-	for (int i = 0; i <= int(log2(power)) + 1; ++i)
+	switch (power)
 	{
-		begin += "(-~0<<";
-		end += ")";
+	case 0:		return "-~0";
+	case 1:		return "-~0<<-~0";
+	case 2:		return "-~0<<(-~0<<-~0)";
+	case 4:		return "-~0<<(-~0<<(-~0<<-~0))";
+	case 16:	return "-~0<<(-~0<<(-~0<<(-~0<<-~0)))";
+	case 65536: return "-~0<<(-~0<<(-~0<<(-~0<<(-~0<<-~0))))";
 	}
-
-	return begin + "0" + end;
 }
 
-pair<bool, uint64_t> isMagicPower(uint64_t x)
+void Ebanina::calcBitsPosition(std::vector<uint64_t>& bits, mpz_class x) noexcept
 {
-	static array<uint64_t, 4> powers = { 0, 1, 2, 4 };
+	uint64_t pos = 0;
+	while (true)
+	{
+		pos = mpz_scan1(x.get_mpz_t(), pos);
+		if (pos == __GMP_BITCNT_MAX) break;
+		bits.push_back(pos);
+		++pos;
+	}
 
-	for (auto s : powers)
-		if (x == s) return make_pair(true, s);
-
-	return make_pair(false, 0);
+	// Init: pos++ must be 0 && pos != __GMP_BITCNT_MAX
+	/*uint64_t pos = UINT64_MAX;
+	while (pos++ != __GMP_BITCNT_MAX)
+	{
+		pos = mpz_scan1(x.get_mpz_t(), pos);
+		bits.push_back(pos);
+	}
+	bits.pop_back();*/
 }
