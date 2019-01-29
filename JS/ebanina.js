@@ -32,9 +32,9 @@ function ebanina(x)
     var local_ebanina = '';
     var bits = getBits(x);
     bits.forEach(bit => {
-        var magic = getMagicPower(bit & bit);
+        var magic = getMagicPower(bit);
         if (magic) local_ebanina += magic + '|';
-        else       local_ebanina += '-~0<<(' + ebanina(bit & bit) + ')|'; 
+        else       local_ebanina += '-~0<<(' + ebanina(bit) + ')|'; 
     });
 
     return local_ebanina.slice(0, -1);
