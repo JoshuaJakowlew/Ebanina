@@ -19,8 +19,8 @@ function bitcnt(x)
 
 function getBits(x)
 {
-    var bits = [];
-    var maxIter = bitcnt(x);
+    const bits = [];
+    const maxIter = bitcnt(x);
     for (var i = 0; i < maxIter; ++i)
         if (x & (1 << i))
             bits.push(i);
@@ -29,12 +29,12 @@ function getBits(x)
 
 function ebanina(x)
 {
-    var local_ebanina = '';
-    var bits = getBits(x);
+    let local_ebanina = '';
+    const bits = getBits(x);
     bits.forEach(bit => {
-        var magic = getMagicPower(bit);
-        if (magic) local_ebanina += magic + '|';
-        else       local_ebanina += '-~0<<(' + ebanina(bit) + ')|'; 
+        const magic = getMagicPower(bit);
+        local_ebanina += magic ? magic + '|'
+                               : `-~0<<(${ebanina(bit)})|`;
     });
 
     return local_ebanina.slice(0, -1);
