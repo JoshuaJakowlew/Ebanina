@@ -15,7 +15,7 @@ source code: https://github.com/HuHguZ/huhguz.github.io/tree/master/ebanina
 website: https://huhguz.github.io/ebanina/eb
 
 pravdakotchestno wrote a Hello world program using precomputed ebanina
-source code: https://github.com/pravdakotchestno/CPPandCprograms/blob/master/OtherPrograms/strangeCode/ebnprinter.c
+source code: https://github.com/JoshuaJakowlew/Ebanina/blob/master/Ebnprinter/ebnprinter.c
 
 ## Build
 Ebanina was developed using Visual Studio 2017. VS Project is provided. Ebanina depends on mpir - https://github.com/wbhart/mpir. To simlify the inastallation process, precompiled .lib files of mpir and Ebanina are also provided.
